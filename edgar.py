@@ -10,10 +10,10 @@ cik_numbers = ["0001274644"]#"0001369786","0001310114","0001502034","0001122388"
 
 for cik_number in cik_numbers:
    
-    metadatas_10k = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-K"))
+    metadatas_10k = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-K",limit=9999))
 
  
-    metadatas_10q = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-Q"))
+    metadatas_10q = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-Q",limit=9999))
 
     if metadatas_10k:
         print(f"10-K Filings for CIK {cik_number}:")
