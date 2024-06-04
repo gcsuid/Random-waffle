@@ -17,12 +17,37 @@ def extract_financial_data_from_html(html_content):
         'Operating loss': None
     }
 
-    # Helper function to find the value by the tag's text
+    # Possible table headers to search for
+    possible_headers = [
+        "Consolidated Statements of Operations Data",
+        "Condensed Consolidated Statements of Operations",
+        "Consolidated Statements of Income",
+        "Condensed Consolidated Statements of Income",
+        "Consolidated Statements of Earnings",
+        "Condensed Consolidated Statements of Earnings",
+        "Consolidated Statements of Operations and Comprehensive Loss Data",
+        "Statement of Comprehensive Income",
+        "Statement of Operations Data",
+        "Consolidated Statements of Operations and Comprehensive Loss",
+    ]
+
+    # Locate the table by its specific header
+    table = None
+    for header in possible_headers:
+        header_tag = soup.find('font', string=re.compile(header, re.IGNORECASE))
+        if header_tag:
+            table = header_tag.find_parent('table')
+            break
+
+    if not table:
+        return financial_data
+
+    # Helper function to find the value by the tag's text within the table
     def find_value(labels):
         if isinstance(labels, str):
             labels = [labels]
         for label in labels:
-            label_tag = soup.find(string=label)  # Changed from soup.find(text=label) to soup.find(string=label)
+            label_tag = table.find(string=re.compile(label, re.IGNORECASE))  # Changed to regex search with re.IGNORECASE
             if label_tag:
                 value_tag = label_tag.find_next()
                 if value_tag:
@@ -56,7 +81,6 @@ def extract_financial_data_from_html(html_content):
 
 dl = Downloader("MyCompanyName", "email@example.com")
 
-
 csv_file_path = "C:/Users/KIIT/Desktop/programs/pythonn/cik.csv" 
 
 cik_numbers = []
@@ -65,16 +89,11 @@ with open(csv_file_path, mode='r') as file:
     for row in reader:
         cik_numbers.append(row['CIK'])
 
-
 for cik_number in cik_numbers:
     try:
-       
         metadatas_10k = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-K", limit=9999))
-
-       
         metadatas_10q = dl.get_filing_metadatas(RequestedFilings(ticker_or_cik=cik_number, form_type="10-Q", limit=9999))
 
-        
         if metadatas_10k:
             print(f"10-K Filings for CIK {cik_number}:")
             for metadata in metadatas_10k:
@@ -85,15 +104,15 @@ for cik_number in cik_numbers:
                 # Print the extracted financial data
                 print("Financial Data:")
                 print(financial_data)
-                #exit()
 
-       
         if metadatas_10q:
             print(f"10-Q Filings for CIK {cik_number}:")
             for metadata in metadatas_10q:
                 print(metadata.primary_doc_url)
                 html = dl.download_filing(url=metadata.primary_doc_url).decode()
                 financial_data = extract_financial_data_from_html(html)
+                print("Financial Data:")
+                print(financial_data)
 
     except Exception as e:
         print(f"Error processing CIK {cik_number}: {e}")
