@@ -4,7 +4,7 @@ from edgar import Company, set_identity
 from edgar.entities import EntityFiling
 
 with open("ciks.csv", "r") as f:
-    data = [x[0] for x in csv.reader(f)]
+    cik_data = [row[0] for row in csv.reader(f)]
 
 # Tell the SEC who you are
 set_identity("Michael Mccallum mike.mccalum@indigo.com")
@@ -54,8 +54,8 @@ def extract_data_from_xbrl(filings: list[EntityFiling]):
             write_to_csv({"CIK Number": filing.cik, "Filing Type": filing.form, "Accession No.": filing.accession_no, **filing_data})
 
 
-ciks = ["1617798", "1533932", "1378992", "1512673", "1412270", random.choices(data, k=20)]
-for cik in ciks:
+#ciks = ["1617798", "1533932", "1378992", "1512673", "1412270", random.choices(data, k=20)]
+for cik in cik_data:
     print(cik)
     filings = Company(cik).get_filings(form=["10-Q", "10-K"])
 
