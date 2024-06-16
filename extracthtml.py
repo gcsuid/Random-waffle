@@ -59,9 +59,9 @@ for cik in cik_data:
     filings = Company(cik).get_filings(form=["10-Q", "10-K"])
    
     
-    if not filings:
+    """if not filings:
         print("No 10-Q or 10-K filings found")
-        continue
+        continue"""
 
     for filing in filings:
         html_content = filing.html()  
