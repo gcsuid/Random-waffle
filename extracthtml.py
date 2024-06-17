@@ -2,15 +2,11 @@ import csv
 import re
 from bs4 import BeautifulSoup
 from edgar import Company, set_identity
-from edgar.entities import EntityFiling
-with open("cik.csv", "r") as f:
-    cik_data = [row[0] for row in csv.reader(f)]
-
 
 set_identity("Michael Mccallum mike.mccalum@indigo.com")
 
 def find_value(search_terms, search_scope):
-    """Searches for the first occurrence of any term in search_terms within search_scope."""
+    
     for term in search_terms:
         if term in search_scope:
             return search_scope[search_scope.index(term):].split('\n')[0]
@@ -54,17 +50,22 @@ def extract_financial_data(html_content):
 
     return financial_data
 
+with open("cik.csv", "r") as f:
+    cik_data = [row[0] for row in csv.reader(f)]
+
 for cik in cik_data:
     print(cik)
-    filings = Company(cik).get_filings(form=["10-Q", "10-K"])
-   
     
-    """if not filings:
-        print("No 10-Q or 10-K filings found")
-        continue"""
-
-    for filing in filings:
+    filings_q = Company(cik).get_filings(form=["10-Q"])
+    for filing in filings_q:
         html_content = filing.html()  
         financial_data = extract_financial_data(html_content)
-        print({"CIK Number": filing.cik, "Filing Type": filing.form}) #**filing_data})
+        print({"CIK Number": filing.cik, "Filing Type": filing.form})
+        print(financial_data)
+
+    filings_k = Company(cik).get_filings(form=["10-K"])
+    for filing in filings_k:
+        html_content = filing.html()  
+        financial_data = extract_financial_data(html_content)
+        print({"CIK Number": filing.cik, "Filing Type": filing.form})
         print(financial_data)
